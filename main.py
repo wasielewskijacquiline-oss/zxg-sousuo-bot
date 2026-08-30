@@ -7,7 +7,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
 # Telegram Bot Token
-TOKEN = "8632208346:AAEgjua5CSyMbs1s9CetcZM0hnNZBtD3590"
+TOKEN = "8632208346:AAGdvE-NC1GqeP5c8rAFbhIIopCZcimOLqk"
 
 # 1. 专为通过 Render 端口健康检查准备的 HTTP 服务
 class HealthCheckHandler(BaseHTTPRequestHandler):
