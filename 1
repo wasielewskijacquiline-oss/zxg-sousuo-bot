@@ -1,0 +1,36 @@
+8G24MR
+8G24MR
+import requests
+from telegram import Update
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+
+# 填入你从 BotFather 拿到的 Token
+TOKEN = "你的_BOT_TOKEN_粘贴在这里"
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("你好！直接发送关键词（如：流浪地球），我来为你找资源。")
+
+async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyword = update.message.text
+    # 此处调用开源盘搜/网盘搜索 API（示例逻辑）
+    api_url = f"https://api.pansearch.me/search?q={keyword}" 
+    
+    try:
+        res = requests.get(api_url, timeout=10).json()
+        results = res.get("data", [])
+        if not results:
+            await update.message.reply_text("未找到相关资源，换个关键词试试吧。")
+            return
+            
+        msg = "🔍 **找到以下资源：**\n\n"
+        for item in results[:5]:  # 取前5条展示
+            msg += f"📌 **{item.get('title')}**\n🔗 {item.get('link')}\n\n"
+        await update.message.reply_text(msg, parse_mode="Markdown")
+    except Exception:
+        await update.message.reply_text("搜索服务繁忙，请稍后再试。")
+
+if __name__ == "__main__":
+    app = Application.builder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, search))
+    app.run_polling()
