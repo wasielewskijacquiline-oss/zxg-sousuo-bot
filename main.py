@@ -29,16 +29,19 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(msg, parse_mode="Markdown")
     except Exception:
         await update.message.reply_text("搜索服务繁忙，请稍后再试。")
-
 if __name__ == "__main__":
+    # 1. 先启动保活线程（必须放在前面）
+    def run_dummy_server():
+        port = int(os.environ.get("PORT", 10000))
+        server = HTTPServer(('0.0.0.0', port), SimpleHTTPRequestHandler)
+        server.serve_forever()
+
+    threading.Thread(target=run_dummy_server, daemon=True).start()
+
+    # 2. 配置并启动机器人
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, search))
+    
+    # 3. 运行机器人（必须作为最后一行）
     app.run_polling()
-# 专门应对 Render Web Service 的端口保活
-def run_dummy_server():
-    port = int(os.environ.get("PORT", 10000))
-    server = HTTPServer(('0.0.0.0', port), SimpleHTTPRequestHandler)
-    server.serve_forever()
-
-threading.Thread(target=run_dummy_server, daemon=True).start()
