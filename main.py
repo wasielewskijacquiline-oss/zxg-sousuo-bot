@@ -79,4 +79,5 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, search))
     
-    app.run_polling()
+    # 加入 close_loop=False 参数，防止异常退出时引发事件循环崩溃
+    app.run_polling(close_loop=False)
