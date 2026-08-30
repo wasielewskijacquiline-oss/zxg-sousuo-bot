@@ -4,7 +4,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
 # 填入你从 BotFather 拿到的 Token
-TOKEN = "你的_BOT_TOKEN_粘贴在这里"
+TOKEN = "8632208346:AAEgjua5CSyMbs1s9CetcZM0hnNZBtD3590"
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("你好！直接发送关键词（如：流浪地球），我来为你找资源。")
