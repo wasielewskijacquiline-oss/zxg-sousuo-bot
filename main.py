@@ -1,5 +1,4 @@
-8G24MR
-8G24MR
+
 import requests
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
