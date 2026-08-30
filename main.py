@@ -29,23 +29,44 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyword = update.message.text
     api_url = f"https://api.pansearch.me/search?q={keyword}"
+    
+    # 加入浏览器请求头伪装（防止 API 防爬虫拦截）
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "application/json, text/plain, */*",
+        "Referer": "https://www.pansearch.me/"
+    }
 
     try:
-        res = requests.get(api_url, timeout=10).json()
-        results = res.get("data", [])
+        res = requests.get(api_url, headers=headers, timeout=10)
+        print(f"[Log] API 状态码: {res.status_code}")
+        
+        if res.status_code != 200:
+            print(f"[Error] API 拦截或报错: {res.text[:200]}")
+            await update.message.reply_text("搜索服务响应异常，请换个关键词试试。")
+            return
+
+        data = res.json()
+        results = data.get("data", [])
+        
         if not results:
             await update.message.reply_text("未找到相关资源，换个关键词试试吧。")
             return
 
         msg = "🔍 **找到以下资源：**\n\n"
         for item in results[:5]:
-            msg += f"📌 **{item.get('title')}**\n🔗 {item.get('link')}\n\n"
+            title = item.get('title') or item.get('name') or "未知资源"
+            link = item.get('link') or item.get('url') or "无链接"
+            msg += f"📌 **{title}**\n🔗 {link}\n\n"
+            
         await update.message.reply_text(msg, parse_mode="Markdown")
-    except Exception:
+        
+    except Exception as e:
+        print(f"[Exception] 详细报错原因: {e}")
         await update.message.reply_text("搜索服务繁忙，请稍后再试。")
 
 if __name__ == "__main__":
-    # 3. 优先在后台启动保活端口服务（绑定 Render 要求的 PORT）
+    # 3. 优先在后台启动保活端口服务
     def run_dummy_server():
         port = int(os.environ.get("PORT", 10000))
         server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
@@ -58,5 +79,4 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, search))
     
-    app.run_polling()
     app.run_polling()
